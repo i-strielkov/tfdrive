@@ -8,15 +8,7 @@ In contrast, _tfdrive_ predictions are based on an overlap of KEGG pathways/GO t
 The data from [GSE50588](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE50588) is used here to demonstrate _tfdrive_ predictive performance. This dataset contains the microarray results of 59 human transcription factors knockdowns. Differentially expressed TFs were assigned to the positive class. Although they presumably represent only a fraction of actual positives, the number of correctly identified TFs is expected to correlate with the number of all TFs involved in differential gene expression. Therefore, the results of such analysis may give a general impression regarding algorithm's predictive accuracy. Previously, this approach for model evaluation was employed in the development of ChEA3 (see this [publication](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6602523/) for details). Note that for testing purposes KEGG pathway/GO term information attributed to differentially expressed TFs was excluded from the analysis to avoid data leakage.
 
   <br/>
-
-<div style="display:flex">
-     <div style="flex:1;padding-left:160px;">
-          <img src="./images/test_ROC.png" width="30%" height="30%">
-     </div>
-     <div style="flex:1;padding-right:220px;">
-          <img src="./images/test_PR.png" width="30%" height="30%">
-     </div>
-</div>
+<img src="./images/test_ROC.png" width="30%" height="30%" hspace="20"> <img src="./images/test_PR.png" width="30%" height="30%" hspace="20">
 
 In summary, although _tfdrive_ is not designed to discover new TF-gene interactions, it allows to identify major players driving differential gene expression among known TFs in new experimental data with a high level of precision.
 
@@ -31,8 +23,8 @@ Download _tfdrive_files.7z_ from [here](https://drive.google.com/file/d/1yIZBw4H
 
 ## Usage
 After importing `tfdrive`, call `tfpred` providing a list of gene Entrez IDs as an argument. Currently, the method works only with human genes. `tfpred` returns a DataFrame object containing a ranked list of TFs with probability scores associated with them. The higher the score, the more likely the TF is to be involved in the observed changes in gene expression. Note that TFs from the library, which are found among DEGs, are excluded from the final results.<br/>
-To have a general idea of how the probability scores relate to the actual probability of TF involvement, consider their distribution in the example shown above:
-<img src="./images/prob_distrib.png" width="60%" height="60%"><br/>
+To have a general idea of how the probability scores relate to the actual probability of TF involvement, consider their distribution in the example shown above:<br/>
+<img src="./images/prob_distrib.png" width="60%" height="60%">
 As you can see, the TFs with probability scores higher than 0.45 - 0.5 are much more likely to belong to the positive class than to the negative class.
 
 
