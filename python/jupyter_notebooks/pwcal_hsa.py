@@ -110,14 +110,14 @@ def pwcal (cases_db, exclude_deg_tf = False, n_jobs = 2):
     '''
 
     # Table of TF to TF ID associations
-    tf_names_db = pd.read_parquet('tf_names_hsa.parquet')
+    tf_names_db = pd.read_parquet('data/tf_names_hsa.parquet')
     
     # Table of gene ID to pathway associations
-    pathways_db = pd.read_parquet('pathways_hsa_full_hg38.parquet')
+    pathways_db = pd.read_parquet('data/pathways_hsa_full_hg38.parquet')
     pathways_db.drop_duplicates(['gene_id','pathway'],keep='first', inplace=True)
     
     # Table of gene ID to GO terms (from 'processes' cathegory) associations
-    go_terms_db = pd.read_parquet('go_terms_hsa_processes.parquet')
+    go_terms_db = pd.read_parquet('data/go_terms_hsa_processes.parquet')
     go_terms_db.drop_duplicates(['gene_id','GO_term'],keep='first', inplace=True)
     
     # Arbitrary distribution for calculating 'pathway importance'
