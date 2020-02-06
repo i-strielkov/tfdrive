@@ -10,7 +10,7 @@ The data from [GSE50588](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE5
 <br/>
 <p float="left">
 <img src="./images/test_ROC.png" width="30%" height="30%"> <img src="./images/test_PR.png" width="30%" height="30%">
-</p>
+</p><br/>
 In summary, although _TFdrive_ is not designed to discover new TF-gene interactions, it allows to identify major players driving differential gene expression among known TFs in new experimental data with a high level of precision.
 
 
