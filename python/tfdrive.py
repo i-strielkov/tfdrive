@@ -53,20 +53,20 @@ def tfpred(gene_ids, species = 'hsa'):
         raise ValueError("Only 'hsa' option is currently supported.")
     
     # Load data
-    file_list = ['data/pathways_hsa_full_hg38.parquet',
-                 'data/go_terms_hsa_processes.parquet',
-                 'data/tf_names_hsa.parquet',
-                 'data/tf_families_hsa.parquet',
-                 'data/tf_matrix_transfac.parquet',
-                 'data/tf_matrix_chea.parquet',
-                 'data/rf_mod.joblib',
-                 'data/log_mod.joblib']
+    file_list = ['tfdrive_data/pathways_hsa_full_hg38.parquet',
+                 'tfdrive_data/go_terms_hsa_processes.parquet',
+                 'tfdrive_data/tf_names_hsa.parquet',
+                 'tfdrive_data/tf_families_hsa.parquet',
+                 'tfdrive_data/tf_matrix_transfac.parquet',
+                 'tfdrive_data/tf_matrix_chea.parquet',
+                 'tfdrive_data/rf_mod.joblib',
+                 'tfdrive_data/log_mod.joblib']
                  
     if not all([_os.path.isfile(f) for f in file_list]):
         raise OSError("Some required data files are missing.")
 
     # Table of gene ID to pathway associations
-    pathways_db = _pd.read_parquet('data/pathways_hsa_full_hg38.parquet')
+    pathways_db = _pd.read_parquet('tfdrive_data/pathways_hsa_full_hg38.parquet')
     pathways_db.drop_duplicates(['gene_id','pathway'],keep='first', inplace=True)
 
     gene_ids = list(set(gene_ids))
@@ -74,25 +74,25 @@ def tfpred(gene_ids, species = 'hsa'):
         raise ValueError("Too few or none of provided gene IDs were found in the database.")
 
     # Table of gene ID to GO terms (from 'processes' cathegory) associations
-    go_terms_db = _pd.read_parquet('data/go_terms_hsa_processes.parquet')
+    go_terms_db = _pd.read_parquet('tfdrive_data/go_terms_hsa_processes.parquet')
     go_terms_db.drop_duplicates(['gene_id','GO_term'],keep='first', inplace=True)
 
     # Table of TF to TF ID associations
-    tf_names_db = _pd.read_parquet('data/tf_names_hsa.parquet')
+    tf_names_db = _pd.read_parquet('tfdrive_data/tf_names_hsa.parquet')
 
     # Load TF classification table
-    tf_families_df = _pd.read_parquet('data/tf_families_hsa.parquet')
+    tf_families_df = _pd.read_parquet('tfdrive_data/tf_families_hsa.parquet')
 
     # Tables of TF-gene interactions
-    transfac_df = _pd.read_parquet('data/tf_matrix_transfac.parquet')
-    chea_df = _pd.read_parquet('data/tf_matrix_chea.parquet')
+    transfac_df = _pd.read_parquet('tfdrive_data/tf_matrix_transfac.parquet')
+    chea_df = _pd.read_parquet('tfdrive_data/tf_matrix_chea.parquet')
 
     # Arbitrary distribution for calculating 'pathway importance'
     dist = _st.beta(3,5)
 
     # Prediction models
-    rf_model = _load('data/rf_mod.joblib')
-    log_model = _load('data/log_mod.joblib') 
+    rf_model = _load('tfdrive_data/rf_mod.joblib')
+    log_model = _load('tfdrive_data/log_mod.joblib') 
 
     full_data_df = _pd.DataFrame(columns=['TF', 'TF_id', 'p_share', 
                                          'all_p', 'p_score', 'go_share', 
