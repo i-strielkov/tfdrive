@@ -19,7 +19,7 @@ _TFdrive_ supports Python 3.6+. Usage requires [numpy, scipy, pandas](https://ww
 
 
 ## Installation
-Download _tfdrive_files.7z_ from [here](https://drive.google.com/open?id=1hrzQ0xKb8LJKDUT8K5CDDVxw-AtfyFBy) (220 MB) and unpack _tfdrive.py_ and the _tfdrive_data_ folder to your project folder.
+Download _tfdrive_files.7z_ from [here](https://drive.google.com/open?id=1hrzQ0xKb8LJKDUT8K5CDDVxw-AtfyFBy) (215 MB) and unpack _tfdrive.py_ and the _tfdrive_data_ folder to your project folder.
 
 
 ## Usage
