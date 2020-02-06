@@ -3,3 +3,4 @@ __pycache__
 *.joblib
 *.7z
 python/Untitled.ipynb
+tfdrive_data
