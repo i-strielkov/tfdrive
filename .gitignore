@@ -3,4 +3,4 @@ __pycache__
 *.joblib
 *.7z
 python/test.ipynb
-tfdrive_data
+python/tfdrive_data
