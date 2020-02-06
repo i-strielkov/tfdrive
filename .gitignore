@@ -2,3 +2,4 @@
 __pycache__
 *.joblib
 *.7z
+tfdrive_data
