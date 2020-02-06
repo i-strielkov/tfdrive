@@ -1,6 +1,6 @@
 # TFdrive
 
-_TFdrive_ is an algorithm for functional prediction of transcription factors (TF) driving differential gene expression. It uses a list of differentially expressed genes identified, e.g., by an RNA-seq or microarray analysis and returns a list of TFs ranked by the probability score. Currently _TFdrive_ library contains 135 human TFs.
+_TFdrive_ is an algorithm for functional prediction of transcription factors (TF) driving differential gene expression. It uses a list of differentially expressed genes identified, e.g., by an RNA-seq or microarray analysis and returns a list of TFs ranked by the probability score. Currently _TFdrive_ library contains 173 human TFs.
 
 ## Method Details
 Accurate predictions of TFs driving changes in gene expression is still a challenging task. Current methods are predominantly based on the available TF binding site data. However, the significance of a certain TF binding site often heavily depends on a cell type, experimental conditions and activity of other TFs. As a result, such methods tend to produce a lot of false positives. 
