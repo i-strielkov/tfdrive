@@ -157,7 +157,7 @@ def tfpred(gene_ids, species = 'hsa'):
     # If GO terms values are missing, insert those from KEGG pathway values
     for i in full_data_df.index:
         if full_data_df.at[i,'all_go'] == 0:
-            full_data_df.at[i,'common_go'] = full_data_df.at[i,'common_p']
+            full_data_df.at[i,'go_share'] = full_data_df.at[i,'p_share']
             full_data_df.at[i,'all_go'] = full_data_df.at[i,'all_p']
             full_data_df.at[i,'go_score'] = full_data_df.at[i,'p_score']
 
