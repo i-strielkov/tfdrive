@@ -1,5 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+## 17-02-2020
+- The way how missing data for GO terms is imputed was corrected.
+
 ## 06-02-2020
 - The number of TFs in the library has been increased from 135 to 173. 
+
+## 29-01-2020
+- First Python version of TFdrive. 
