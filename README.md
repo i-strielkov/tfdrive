@@ -12,27 +12,37 @@ The data from [GSE50588](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE5
 <img src="./images/test_ROC.png" width="30%" height="30%"> <img src="./images/test_PR.png" width="30%" height="30%">
 </p>
 
+The R version of the algorithm have similar predictive efficiency in this test (ROC AUC = 0.864, PR AUC = 0.846; see the Jupyter Notebook file [here](https://github.com/i-strielkov/tfdrive/blob/master/r/model/R_model.ipynb) for details). However, since it relies on a different logistic regression library (_glmnet_) and currently does not use random forest, the results can be slightly different as compared to the Python library. <br/>
 In summary, although _TFdrive_ is not designed to discover new TF-gene interactions, it allows to identify major players driving differential gene expression among known TFs in new experimental data with a high level of precision.
 
 
 ## Dependencies
+### Python
 _TFdrive_ supports Python 3.6+. Usage requires [numpy, scipy, pandas](https://www.scipy.org/), [pyarrow](https://github.com/apache/arrow), [scikit-learn](https://github.com/scikit-learn/scikit-learn), and [joblib](https://github.com/joblib/joblib).
+### R
+_TFdrive_ work with R 3.6.1+ and uses _glmnet_ library to calculate the probability scores.
 
 
 ## Installation
+### Python
 Download _tfdrive_files.7z_ from [here](https://drive.google.com/open?id=1hrzQ0xKb8LJKDUT8K5CDDVxw-AtfyFBy) (215 MB) and unpack _tfdrive.py_ and the _tfdrive_data_ folder to your project folder.
+### R
+Use _devtools_ library for installation:
+```r
+devtools::install_github("i-strielkov/tfdrive/r")
+```
 
 
 ## Usage
-After importing `tfdrive`, call `tfpred` providing a list of gene Entrez IDs as an argument. Currently, the method works only with human genes. `tfpred` returns a DataFrame object containing a ranked list of TFs with probability scores associated with them. The higher the score, the more likely the TF is to be involved in the observed changes in gene expression. Note that TFs from the library, which are found among DEGs, are excluded from the final results.<br/>
+After importing `tfdrive`, call `tfpred` providing a list of gene Entrez IDs as an argument. The values may be either integers or strings.
+Currently, the method works only with human genes. `tfpred` returns a Data Frame object containing a ranked list of TFs with probability scores associated with them. The higher the score, the more likely the TF is to be involved in the observed changes in gene expression. Note that TFs from the library, which are found among DEGs, are excluded from the final results.<br/>
 To have a general idea of how the probability scores relate to the actual probability of TF involvement, consider their distribution in the example shown above:<br/><br/>
 <img src="./images/prob_distrib.png" width="60%" height="60%"><br/><br/>
-As you can see, the TFs with probability scores higher than 0.45 - 0.5 are much more likely to belong to the positive class than to the negative class.
+As you can see, the TFs with probability scores higher than 0.45 - 0.5 are much more likely to belong to the positive class than to the negative class. The distribution of probability scores for R lirary is expected to be slightly different.
 
 
 ## Future plans
 - Increasing TF library and training dataset
-- R library
 - A model for prediction of mouse TFs
 - Other tweaks to the algorithm
 
