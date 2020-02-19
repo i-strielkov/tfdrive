@@ -1,0 +1,23 @@
+Package: tfdrive
+Title: Functional prediction of transcription factors driving differential gene expression
+Version: 0.1
+Authors@R: 
+    person(given = "Ievgen",
+           family = "Strielkov",
+           role = c("aut", "cre"),
+           email = "i.strielkov@gmail.com")
+Description: TFdrive is an algorithm for functional prediction of transcription factors (TF) 
+	driving differential gene expression. It uses a list of differentially expressed genes 
+	identified, e.g., by an RNA-seq or microarray analysis and returns a list of TFs ranked 
+	by the probability score. Currently TFdrive library contains 173 human TFs.
+Depends: R (>= 3.6.1)
+License: MIT License
+Imports: glmnet (>= 3.0)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.2
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
