@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 
+## 19-02-2020
+- R package is now available
+
 ## 17-02-2020
 - The way how missing data for GO terms is imputed was corrected.
 
