@@ -1,2 +1,4 @@
 ^tfdrive\.Rproj$
 ^\.Rproj\.user$
+^doc$
+^Meta$
