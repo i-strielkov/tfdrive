@@ -1,0 +1,47 @@
+---
+title: "TFdrive"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{tfdrive}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+_TFdrive_ is an algorithm for functional prediction of transcription factors (TF) driving differential gene expression. It uses a list of differentially expressed genes identified, e.g., by an RNA-seq or microarray analysis and returns a list of TFs ranked by the probability score. Currently _TFdrive_ library contains 173 human TFs.
+
+## Method Details
+Accurate predictions of TFs driving changes in gene expression is still a challenging task. Current methods are predominantly based on the available TF binding site data. However, the significance of a certain TF binding site often heavily depends on a cell type, experimental conditions and activity of other TFs. As a result, such methods tend to produce a lot of false positives. 
+In contrast, _TFdrive_ predictions are based on an overlap of [KEGG pathways](https://www.genome.jp/kegg/pathway.html)/[GO terms](http://geneontology.org/) between differentially expressed genes (DEGs) and a TF. The algorithm takes into account relative pathway/term importance and the number of genes related to each of the overlapping pathways/terms. This data is further supplemented with the analysis of gene-TF association tables obtained from two manually curated databases, [TRANSFAC](https://amp.pharm.mssm.edu/Harmonizome/dataset/TRANSFAC+Curated+Transcription+Factor+Targets) and [ChEA](https://amp.pharm.mssm.edu/Harmonizome/dataset/CHEA+Transcription+Factor+Targets). These associations are predominantly inferred from TF binding site data. Considering that several TFs from the same family are often able to bind to the same motif, ratios between gene-TF association frequencies among DEGs vs. non-DEGs for each TF family are calculated using TRANSFAC and ChEA tables. Family-based scores appear to have more predictive value in this context than the scores calculated for individual TFs. Lastly, all the scores mentioned above are used to obtain the final probability score using logistic regression. Both random forest and logistic regression models were trained using the results of 443 human TF knockout/knockdown and overexpression experiments available at [ChEA3 website](https://amp.pharm.mssm.edu/chea3/). TFs, which were among DEGs, were considered to belong to the positive class. <br/>
+See a test of the _TFdrive_ predictive model written in Python [here](https://github.com/i-strielkov/tfdrive#method-details). The R version of the algorithm have similar predictive efficiency in this test (ROC AUC = 0.864, PR AUC = 0.846; see the Jupyter Notebook file [here](https://github.com/i-strielkov/tfdrive/blob/master/r/model/R_model.ipynb) for details). However, since it relies on a different logistic regression library (_glmnet_) and currently does not use random forest, the results can be slightly different as compared to the Python version. <br/>
+In summary, although _TFdrive_ is not designed to discover new TF-gene interactions, it allows to identify major players driving differential gene expression among known TFs in new experimental data with a high level of precision.
+
+
+## Dependencies
+_TFdrive_ work with R 3.6.1+ and uses _glmnet_ library to calculate the probability scores.
+
+## Installation
+Use _devtools_ library for installation:
+
+```{r eval=FALSE}
+devtools::install_github("i-strielkov/tfdrive/r")
+```
+
+## Usage
+After importing `tfdrive`, call `tfpred` providing a vector of gene Entrez IDs as an argument. 
+
+```{r eval=FALSE}
+tfpred(c(5714, 135114, 26958, 5899, 494514, 26502, 388325, 79007, 4688, 1428, 259307))
+```
+
+Currently, the method works only with human genes. `tfpred` returns a DataFrame object containing a ranked list of TFs with probability scores associated with them. The higher the score, the more likely the TF is to be involved in the observed changes in gene expression. Note that TFs from the library, which are found among DEGs, are excluded from the final results.<br/>
+
+
+## Future plans
+- Increasing TF library and training dataset
+- A model for prediction of mouse TFs
+- Other tweaks to the algorithm
+
+
+## License
+This project is licensed under the MIT License - see the LICENSE.md file for details
+
+
