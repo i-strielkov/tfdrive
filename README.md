@@ -38,7 +38,7 @@ After importing `tfdrive`, call `tfpred` providing a list of gene Entrez IDs as 
 Currently, the method works only with human genes. `tfpred` returns a Data Frame object containing a ranked list of TFs with probability scores associated with them. The higher the score, the more likely the TF is to be involved in the observed changes in gene expression. Note that TFs from the library, which are found among DEGs, are excluded from the final results.<br/>
 To have a general idea of how the probability scores relate to the actual probability of TF involvement, consider their distribution in the example shown above:<br/><br/>
 <img src="./images/prob_distrib.png" width="60%" height="60%"><br/><br/>
-As you can see, the TFs with probability scores higher than 0.45 - 0.5 are much more likely to belong to the positive class than to the negative class. The distribution of probability scores for R lirary is expected to be slightly different.
+As you can see, the TFs with probability scores higher than 0.45 - 0.5 are much more likely to belong to the positive class than to the negative class. The distribution of probability scores for R library is expected to be slightly different.
 
 
 ## Future plans
