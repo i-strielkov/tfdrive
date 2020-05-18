@@ -27,9 +27,6 @@ tfpred <- function(gene_ids, species = 'hsa'){
   # pathways_hsa - table of pathways attributed to human genes
   # go_hsa - table of GO terms attributed to human genes
   # tf_names - list of TFs
-  # tf_families - table of TF families
-  # transfac_df - table of TF-gene associations from TRANSFAC DB
-  # chea_df - table of TF-gene associations from ChEA DB
   # lr_model - logistic regression model
 
   if (nrow(pathways_hsa[pathways_hsa$gene_id %in% gene_ids,]) < 10) {
@@ -47,7 +44,7 @@ tfpred <- function(gene_ids, species = 'hsa'){
                              go_score = double())
 
   for (i in seq_len(nrow(tf_names))){
-    tf_id <- tf_names[[i, 'gene_id']]
+    tf_id <- tf_names[[i, 'index']]
     tf_name <- tf_names[[i, 'gene']]
 
     # Get unique pathways and terms related to the TF and their counts
@@ -98,98 +95,16 @@ tfpred <- function(gene_ids, species = 'hsa'){
                           stringsAsFactors=FALSE)
   }
 
-  # If GO terms values are missing, insert those from KEGG pathway values
-  for (i in seq_len(nrow(full_data_df))){
-    if (full_data_df$go_all[i] == 0){
-      full_data_df$go_share[i] <- full_data_df$p_share[i]
-      full_data_df$go_all[i] <- full_data_df$p_all[i]
-      full_data_df$go_score[i] <- full_data_df$p_score[i]
-    }
-  }
+  # Check whether there are enough pathways/terms associated with each TF
+  full_data_df <- full_data_df[full_data_df$p_all>2,]
+  full_data_df <- full_data_df[full_data_df$go_all>2,]
 
-  # Calculate relative interaction frequencies for each family for each group
-  tf_group_scores_df <- data.frame(family = character(),
-                                   transfac = double(),
-                                   chea = double())
-  gene_ids_str <- as.character(gene_ids)
-
-  for (f in seq_len(nrow(tf_families))){
-    family <- tf_families$family[f]
-    tf_ids <- tf_families$ids[[f]]
-
-    # Transfac
-    t_value <- 0.0
-    t_tf_ids <- names(transfac_df)[names(transfac_df) %in% tf_ids]
-    t_g_ids <-  gene_ids_str[gene_ids_str %in% transfac_df$gene_id]
-    if (length(t_tf_ids) > 0 & length(t_g_ids) > 0) {
-      t_value <- (sum(transfac_df[transfac_df$gene_id %in% t_g_ids,][t_tf_ids]) / length(t_g_ids)) /
-        (sum(transfac_df[,t_tf_ids]) / nrow(transfac_df))
-    }
-
-    # ChEA
-    c_value <- 0.0
-    c_tf_ids <- names(chea_df)[names(chea_df) %in% tf_ids]
-    c_g_ids <-  gene_ids_str[gene_ids_str %in% chea_df$gene_id]
-    if (length(c_tf_ids) > 0 & length(c_g_ids) > 0) {
-      c_value <- (sum(chea_df[chea_df$gene_id %in% c_g_ids,][c_tf_ids]) / length(c_g_ids)) /
-        (sum(chea_df[,c_tf_ids]) / nrow(chea_df))
-    }
-    tf_group_scores_df <- rbind(tf_group_scores_df,
-                                list(family = family,
-                                     transfac = as.double(t_value),
-                                     chea = as.double(c_value)),
-                                stringsAsFactors=FALSE)
-  }
-
-  # Create TF to TF family association table
-  tf_family_pairs <- data.frame(family = character(), id = character())
-  for (i in seq_len(nrow(tf_families))){
-    family <- tf_families$family[i]
-    ids <- tf_families$ids[[i]]
-    for (g in ids){
-      tf_family_pairs <- rbind(tf_family_pairs,
-                               list(family = family,
-                                    id = g),
-                               stringsAsFactors=FALSE)
-    }
-  }
-
-  # Assign values to full_data_df
-  full_data_df$transfac <- 0.0
-  full_data_df$chea <- 0.0
-  for (i in seq_len(nrow(full_data_df))){
-    tf_id <- as.character(full_data_df$TF_id[i])
-    if (tf_id %in% tf_family_pairs$id){
-      family <- tf_family_pairs[tf_family_pairs$id==tf_id,]$family
-      full_data_df$transfac[i] <- tf_group_scores_df[tf_group_scores_df$family==family,]$transfac
-      full_data_df$chea[i] <- tf_group_scores_df[tf_group_scores_df$family==family,]$chea
-    } else {
-      # If TF is not in the TF families, calculate individual values
-      if (tf_id %in% names(transfac_df) & length(t_g_ids) > 0) {
-        t_value <- (sum(transfac_df[transfac_df$gene_id %in% t_g_ids,][tf_id]) / length(t_g_ids)) /
-          (sum(transfac_df[,tf_id]) / nrow(transfac_df))
-        full_data_df$transfac[i] <- t_value
-      }
-      if (tf_id %in% names(chea_df) & length(c_g_ids) > 0) {
-        c_value <- (sum(chea_df[chea_df$gene_id %in% c_g_ids,][tf_id]) / length(c_g_ids)) /
-          (sum(chea_df[,tf_id]) / nrow(chea_df))
-        full_data_df$chea[i] <- c_value
-      }
-    }
-  }
-
-  # Fill zeroes if only one ('chea' or 'transfac') value is available
-  full_data_df$transfac <- sapply(seq_len(nrow(full_data_df)), function(i) ifelse(full_data_df$transfac[i]==0,
-                                                                                  full_data_df$chea[i],
-                                                                                  full_data_df$transfac[i]))
-  full_data_df$chea <- sapply(seq_len(nrow(full_data_df)), function(i) ifelse(full_data_df$chea[i]==0,
-                                                                              full_data_df$transfac[i],
-                                                                              full_data_df$chea[i]))
   # Predictions of Logistic Regression model
   lr_pred <- predict(lr_model,
-                     as.matrix(full_data_df[, c('p_share','p_all','p_score',
-                                                'go_share','go_all','go_score',
-                                                'transfac','chea')]),
+                     as.matrix(full_data_df[, c('p_share',
+                                                'p_score',
+                                                'go_share',
+                                                'go_score')]),
                      type="response")
   full_data_df$LR_prob <- as.vector(lr_pred)
 
