@@ -7,7 +7,7 @@ from itertools import repeat
 import scipy.stats as st
 
 def __get_ptws(ids, pathways_db, go_terms_db):
-    '''Get list of patways/terms based in gene IDs'''
+    '''Get list of patways/terms based on gene IDs'''
     pathways = list(pathways_db[pathways_db['gene_id'].isin(ids)]['pathway'])
     go_terms = list(go_terms_db[go_terms_db['gene_id'].isin(ids)]['GO_term'])
     return pathways, go_terms
@@ -21,7 +21,7 @@ def __pcal(n, tf_id, tf_name, cases_db, pathways_db, go_terms_db, dist, exclude_
                                         'all_p', 'p_score', 'go_share', 'all_go', 
                                         'go_score'])
     indx = 0
-    print(f'Processing TF {n+1}: {tf_name} {tf_id}')  
+    print(f'Processing TF {n+1}: {tf_name} ID: {tf_id}')  
 
     # Get unique pathways and terms related to the TF and their counts 
     tf_ptws, tf_terms = __get_ptws([tf_id], pathways_db, go_terms_db)
@@ -29,6 +29,13 @@ def __pcal(n, tf_id, tf_name, cases_db, pathways_db, go_terms_db, dist, exclude_
     tf_term_count = Counter(tf_terms)
     all_p = len(tf_pw_count)
     all_go = len(tf_term_count)
+
+    total_ptws_count = Counter(pathways_db['pathway'].values)
+    total_term_count = Counter(go_terms_db['GO_term'].values)
+    total_pw_df = pd.DataFrame.from_dict(total_ptws_count, orient='index',columns=['count'])
+    total_go_df = pd.DataFrame.from_dict(total_term_count, orient='index',columns=['count'])
+    max_pw_count = total_pw_df['count'].max()
+    max_go_count = total_go_df['count'].max()
 
     for c in cases_db['case'].index: 
         # Get unique pathways and terms related to differentially expressed genes in each
@@ -45,16 +52,12 @@ def __pcal(n, tf_id, tf_name, cases_db, pathways_db, go_terms_db, dist, exclude_
         # Calculate relative pathway importance for this case
         # The score is calculated based on beta distribution
         pw_df = pd.DataFrame.from_dict(case_ptw_count, orient='index',columns=['count'])
-        pw_df['importance'] = 0.0
-        for i in pw_df.index:
-            pw_df.at[i, 'importance'] = pw_df.at[i, 'count'] /np.max(pw_df['count'].values)
+        pw_df['importance'] = pw_df['count'].apply(lambda x: x/max_pw_count)
         pw_df['importance']  = dist.pdf(pw_df['importance'])
 
         # Calculate relative GO term importance for this case
         go_df = pd.DataFrame.from_dict(case_term_count, orient='index',columns=['count'])
-        go_df['importance'] = 0.0
-        for i in go_df.index:
-            go_df.at[i, 'importance'] = go_df.at[i, 'count'] /np.max(go_df['count'].values)
+        go_df['importance'] = go_df['count'].apply(lambda x: x/max_go_count)
         go_df['importance']  = dist.pdf(go_df['importance'])
 
         # Calculate relative pathway/term overlap and scores based on 'importance'
@@ -62,17 +65,17 @@ def __pcal(n, tf_id, tf_name, cases_db, pathways_db, go_terms_db, dist, exclude_
         common_go = 0
         p_score = 0.0
         go_score = 0.0
-        coef = 1
+        coef = 100
         if all_p > 0:
             for i in tf_pw_count:
-                if i in case_ptw_count:
+                if i in pw_df.index:
                     common_p += 1
-                    p_score += coef*pw_df.at[i, 'importance'] *case_ptw_count[i] 
+                    p_score += coef * pw_df.at[i, 'importance'] * pw_df.at[i, 'count']
         if all_go > 0:
             for t in tf_term_count:
-                if t in case_term_count:
+                if t in go_df.index:
                     common_go +=1
-                    go_score += coef*go_df.at[t, 'importance'] *case_term_count[t]
+                    go_score += coef * go_df.at[t, 'importance'] * go_df.at[t, 'count']
 
         if all_p > 0:
             p_share = common_p/all_p
@@ -121,7 +124,7 @@ def pwcal (cases_db, exclude_deg_tf = False, n_jobs = 2):
     go_terms_db.drop_duplicates(['gene_id','GO_term'],keep='first', inplace=True)
     
     # Arbitrary distribution for calculating 'pathway importance'
-    dist = st.beta(3,5)
+    dist = st.beta(2,2)
 
     # Create a process pool 
     pool = Pool(processes=n_jobs) 

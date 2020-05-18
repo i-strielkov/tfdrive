@@ -88,7 +88,7 @@ def tfpred(gene_ids, species = 'hsa'):
     chea_df = _pd.read_parquet('tfdrive_data/tf_matrix_chea.parquet')
 
     # Arbitrary distribution for calculating 'pathway importance'
-    dist = _st.beta(3,5)
+    dist = _st.beta(2,2)
 
     # Prediction models
     rf_model = _load('tfdrive_data/rf_mod.joblib')
@@ -116,18 +116,16 @@ def tfpred(gene_ids, species = 'hsa'):
         case_ptw_count = _Counter(case_ptws)
         case_term_count = _Counter(case_terms)
 
-        # Calculate relative pathway importance
+        # Calculate relative pathway/GO term importance
+        max_pw_count = max(_Counter(pathways_db['pathway'].values).values())
+        max_go_count = max(_Counter(go_terms_db['GO_term'].values).values())
+
         pw_df = _pd.DataFrame.from_dict(case_ptw_count, orient='index',columns=['count'])
-        pw_df['importance'] = 0.0
-        for i in pw_df.index:
-            pw_df.at[i, 'importance'] = pw_df.at[i, 'count'] /_np.max(pw_df['count'].values)
+        pw_df['importance'] = pw_df['count'].apply(lambda x: x/max_pw_count)
         pw_df['importance']  = dist.pdf(pw_df['importance'])
 
-        # Calculate relative GO term importance
         go_df = _pd.DataFrame.from_dict(case_term_count, orient='index',columns=['count'])
-        go_df['importance'] = 0.0
-        for i in go_df.index:
-            go_df.at[i, 'importance'] = go_df.at[i, 'count'] /_np.max(go_df['count'].values)
+        go_df['importance'] = go_df['count'].apply(lambda x: x/max_go_count)
         go_df['importance']  = dist.pdf(go_df['importance'])
 
         # Calculate relative pathway/term overlap and scores based on 'importance'
@@ -154,12 +152,9 @@ def tfpred(gene_ids, species = 'hsa'):
         full_data_df.loc[len(full_data_df)] = [tf_name, tf_id, p_share, all_p,  
                                                p_score, go_share, all_go, go_score]
 
-    # If GO terms values are missing, insert those from KEGG pathway values
-    for i in full_data_df.index:
-        if full_data_df.at[i,'all_go'] == 0:
-            full_data_df.at[i,'go_share'] = full_data_df.at[i,'p_share']
-            full_data_df.at[i,'all_go'] = full_data_df.at[i,'all_p']
-            full_data_df.at[i,'go_score'] = full_data_df.at[i,'p_score']
+    #Drop TFs which have less than 3 pathways associated with them
+    full_data_df = full_data_df[full_data_df['all_p']>2].copy(deep=True)
+    full_data_df = full_data_df[full_data_df['all_go']>2].copy(deep=True)
 
     # Calculate relative interaction frequencies for each family for each group
     tf_group_scores_df = _pd.DataFrame(columns=['family', 'transfac', 'chea'])
@@ -229,9 +224,8 @@ def tfpred(gene_ids, species = 'hsa'):
                                                                     'transfac','chea']].values)[:,[1]]
 
     # Predictions of Logistic Regression model
-    full_data_df['LR_prob'] = log_model.predict_proba(full_data_df[['p_share','all_p','p_score', 
-                                                'go_share','all_go', 'go_score',
-                                                'transfac','chea','RF_prob']].values)[:,[1]]
+    full_data_df['LR_prob'] = log_model.predict_proba(full_data_df[['p_share','p_score', 
+                                                'go_share', 'go_score', 'RF_prob']].values)[:,[1]]
 
 
     full_data_df.drop(columns=['RF_prob', 'p_share', 'all_p', 'p_score', 'go_share', 'all_go', 
