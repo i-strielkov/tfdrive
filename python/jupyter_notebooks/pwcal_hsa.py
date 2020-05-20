@@ -46,6 +46,7 @@ def __pcal(n, tf_id, tf_name, cases_db, pathways_db, go_terms_db, dist, exclude_
         else:
             case_ids = cases_db.at[c,'degs_entrez'] 
         case_ptws, case_terms = __get_ptws(case_ids, pathways_db, go_terms_db)
+        if (len(case_ptws)==0 or len(case_terms)==0): continue 
         case_ptw_count = Counter(case_ptws)
         case_term_count = Counter(case_terms)
 
