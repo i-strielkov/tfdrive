@@ -12,7 +12,7 @@ The data from [GSE50588](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE5
 <img src="./images/test_ROC.png" width="30%" height="30%"> <img src="./images/test_PR.png" width="30%" height="30%">
 </p>
 
-The R version of the algorithm have similar predictive efficiency in this test (ROC AUC = 0.864, PR AUC = 0.846; see the Jupyter Notebook file [here](https://github.com/i-strielkov/tfdrive/blob/master/r/model/R_model.ipynb) for details). However, since it relies on a different logistic regression library (_glmnet_) and currently does not use random forest, the results can be slightly different as compared to the Python library. <br/>
+The R version of the algorithm have similar predictive efficiency in this test (ROC AUC = 0.868, PR AUC = 0.861; see the Jupyter Notebook file [here](https://github.com/i-strielkov/tfdrive/blob/master/r/model/R_model.ipynb) for details). However, since it relies on a different logistic regression library (_glmnet_) and currently does not use random forest, the results can be slightly different as compared to the Python library. <br/>
 In summary, although _TFdrive_ is not designed to discover new TF-gene interactions, it allows to identify major players driving differential gene expression among known TFs in new experimental data with a high level of precision.
 
 
