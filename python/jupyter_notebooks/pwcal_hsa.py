@@ -71,20 +71,15 @@ def __pcal(n, tf_id, tf_name, cases_db, pathways_db, go_terms_db, dist, exclude_
             for i in tf_pw_count:
                 if i in pw_df.index:
                     common_p += 1
-                    p_score += coef * pw_df.at[i, 'importance'] * pw_df.at[i, 'count']
+                    p_score += coef * pw_df.at[i, 'importance'] * pw_df.at[i, 'count'] / len(case_ids)
         if all_go > 0:
             for t in tf_term_count:
                 if t in go_df.index:
                     common_go +=1
-                    go_score += coef * go_df.at[t, 'importance'] * go_df.at[t, 'count']
+                    go_score += coef * go_df.at[t, 'importance'] * go_df.at[t, 'count'] / len(case_ids)
 
-        if all_p > 0:
-            p_share = common_p/all_p
-        else: p_share = 0.0
-
-        if all_go > 0:
-            go_share = common_go/all_go
-        else: go_share = 0.0
+        p_share = common_p/all_p if all_p > 0 else 0.0
+        go_share = common_go/all_go if all_go > 0 else 0.0
         
         # Add to DataFrame
         full_data_df.loc[indx] = [c, cases_db.at[c,'case'], tf_name, tf_id, p_share, all_p,  

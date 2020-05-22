@@ -133,17 +133,19 @@ def tfpred(gene_ids, species = 'hsa'):
         common_go = 0
         p_score = 0.0
         go_score = 0.0
+        coef = 100
+        
         if all_p > 0:
             for i in tf_pw_count:
                 if i in case_ptw_count:
                     common_p += 1
-                    p_score += pw_df.at[i, 'importance'] *case_ptw_count[i] 
+                    p_score += coef * pw_df.at[i, 'importance'] * pw_df.at[i, 'count'] / len(gene_ids)
 
         if all_go > 0:
             for t in tf_term_count:
                 if t in case_term_count:
-                    common_go +=1
-                    go_score += go_df.at[t, 'importance'] *case_term_count[t]
+                    common_go += 1
+                    go_score += coef * go_df.at[t, 'importance'] * go_df.at[t, 'count'] / len(gene_ids)
   
         p_share = common_p/all_p if all_p > 0 else 0.0
         go_share = common_go/all_go if all_go > 0 else 0.0
