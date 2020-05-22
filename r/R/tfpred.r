@@ -43,6 +43,9 @@ tfpred <- function(gene_ids, species = 'hsa'){
                              go_all = double(),
                              go_score = double())
 
+  max_pw_count = max(table(pathways_hsa$pathway))
+  max_go_count = max(table(go_hsa$GO_term))
+
   for (i in seq_len(nrow(tf_names))){
     tf_id <- tf_names[[i, 'index']]
     tf_name <- tf_names[[i, 'gene']]
@@ -61,9 +64,9 @@ tfpred <- function(gene_ids, species = 'hsa'){
 
     # Calculate relative pathway/GO term importance
     pw_df <- as.data.frame(table(case_ptws))
-    pw_df['importance'] <- sapply(pw_df$Freq, function(f) dbeta(f/max(pw_df$Freq), 3, 5) )
+    pw_df['importance'] <- sapply(pw_df$Freq, function(f) dbeta(f/max_pw_count, 2, 2) )
     go_df <- as.data.frame(table(case_terms))
-    go_df['importance'] <- sapply(go_df$Freq, function(f) dbeta(f/max(go_df$Freq), 3, 5) )
+    go_df['importance'] <- sapply(go_df$Freq, function(f) dbeta(f/max_go_count, 2, 2) )
 
     # Keep only common pathways and terms
     pw_df <- pw_df[pw_df$case_ptws %in% tf_ptws,]
@@ -73,13 +76,13 @@ tfpred <- function(gene_ids, species = 'hsa'){
     p_common <- go_common <- p_score <- go_score <- p_share <- go_share <- 0.0
     if (p_all > 0 & nrow(pw_df) > 0) {
       p_common <- length(pw_df$case_ptws[pw_df$case_ptws %in% names(tf_pw_count)])
-      p_score <- sum(sapply(seq_len(nrow(pw_df)), function(f) pw_df$importance[f] * pw_df$Freq[f]))
+      p_score <- sum(sapply(seq_len(nrow(pw_df)), function(f)  100 * pw_df$importance[f] * pw_df$Freq[f] / length(gene_ids)))
       p_share <- p_common/p_all
     }
 
     if (go_all > 0 & nrow(go_df) > 0) {
       go_common <- length(go_df$case_terms[go_df$case_terms %in% names(tf_term_count)])
-      go_score <- sum(sapply(seq_len(nrow(go_df)), function(f) go_df$importance[f] * go_df$Freq[f]))
+      go_score <- sum(sapply(seq_len(nrow(go_df)), function(f) 100 * go_df$importance[f] * go_df$Freq[f] / length(gene_ids)))
       go_share <- go_common/go_all
     }
 

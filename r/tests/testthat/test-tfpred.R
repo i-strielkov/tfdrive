@@ -3,9 +3,9 @@ context('tfpred')
 test_that('data intact', {
   load('sysdata.rda')
   expect_true(all(c("gene_id","pathway") %in% names(pathways_hsa)))
-  expect_equal(nrow(pathways_hsa), 52415)
+  expect_equal(nrow(pathways_hsa), 50801)
   expect_equal(names(go_hsa), c('gene_id', 'GO_term'))
-  expect_equal(nrow(go_hsa), 152579)
+  expect_equal(nrow(go_hsa), 139684)
   expect_true(all(c('gene', 'index') %in% names(tf_names)))
   expect_equal(nrow(tf_names), 174)
 })
@@ -31,6 +31,9 @@ test_that("tfpred scores correct", {
                              go_all = double(),
                              go_score = double())
 
+  max_pw_count = max(table(pathways_hsa$pathway))
+  max_go_count = max(table(go_hsa$GO_term))
+
   for (i in seq_len(nrow(tf_names))){
     tf_id <- tf_names[[i, 'index']]
     tf_name <- tf_names[[i, 'gene']]
@@ -49,9 +52,9 @@ test_that("tfpred scores correct", {
 
     # Calculate relative pathway/GO term importance
     pw_df <- as.data.frame(table(case_ptws))
-    pw_df['importance'] <- sapply(pw_df$Freq, function(f) dbeta(f/max(pw_df$Freq), 3, 5) )
+    pw_df['importance'] <- sapply(pw_df$Freq, function(f) dbeta(f/max_pw_count, 2, 2) )
     go_df <- as.data.frame(table(case_terms))
-    go_df['importance'] <- sapply(go_df$Freq, function(f) dbeta(f/max(go_df$Freq), 3, 5) )
+    go_df['importance'] <- sapply(go_df$Freq, function(f) dbeta(f/max_go_count, 2, 2) )
 
     # Keep only common pathways and terms
     pw_df <- pw_df[pw_df$case_ptws %in% tf_ptws,]
@@ -61,13 +64,13 @@ test_that("tfpred scores correct", {
     p_common <- go_common <- p_score <- go_score <- p_share <- go_share <- 0.0
     if (p_all > 0 & nrow(pw_df) > 0) {
       p_common <- length(pw_df$case_ptws[pw_df$case_ptws %in% names(tf_pw_count)])
-      p_score <- sum(sapply(seq_len(nrow(pw_df)), function(f) pw_df$importance[f] * pw_df$Freq[f]))
+      p_score <- sum(sapply(seq_len(nrow(pw_df)), function(f)  100 * pw_df$importance[f] * pw_df$Freq[f] / length(gene_ids)))
       p_share <- p_common/p_all
     }
 
     if (go_all > 0 & nrow(go_df) > 0) {
       go_common <- length(go_df$case_terms[go_df$case_terms %in% names(tf_term_count)])
-      go_score <- sum(sapply(seq_len(nrow(go_df)), function(f) go_df$importance[f] * go_df$Freq[f]))
+      go_score <- sum(sapply(seq_len(nrow(go_df)), function(f) 100 * go_df$importance[f] * go_df$Freq[f] / length(gene_ids)))
       go_share <- go_common/go_all
     }
 
@@ -97,12 +100,13 @@ test_that("tfpred scores correct", {
   full_data_df$LR_prob <- as.vector(lr_pred)
 
   # Preparing results
-  full_data_df <- full_data_df[,c('TF', 'TF_id', 'LR_prob')]
   full_data_df <- full_data_df[!full_data_df$TF_id %in% gene_ids,]
   full_data_df <- full_data_df[order(full_data_df$LR_prob, decreasing = TRUE),]
   rownames(full_data_df) <- 1:nrow(full_data_df)
 
   expect_equal(as.character(full_data_df$TF[1]), 'STAT4')
   expect_equal(as.character(full_data_df$TF_id[1]), '6775')
-  expect_equal(round(full_data_df$LR_prob[1], 6), 0.482965)
+  expect_equal(round(full_data_df$LR_prob[1], 6), 0.483113)
+  expect_equal(round(full_data_df$p_score[1], 6), 0.565435)
+  expect_equal(round(full_data_df$go_score[1], 6), 0.323160)
 })
